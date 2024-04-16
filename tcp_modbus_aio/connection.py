@@ -39,6 +39,11 @@ TEST_CONNECTION_MESSAGE = ReadCoils()
 TEST_CONNECTION_MESSAGE.starting_address = 0
 TEST_CONNECTION_MESSAGE.quantity = 1
 
+DEFAULT_MODBUS_TIMEOUT_SEC = 0.1
+MAX_TRANSACTION_ID = 2**16 - 1  # maximum number that fits in 2 bytes
+MODBUS_MBAP_SIZE = 7
+MBAP_HEADER_STRUCT_FORMAT = ">HHHB"
+
 
 @dataclass
 class TCPModbusClient:
@@ -47,11 +52,6 @@ class TCPModbusClient:
     KEEPALIVE_MAX_FAILS: ClassVar = 5
 
     PING_LOOP_PERIOD: ClassVar = 1
-
-    DEFAULT_MODBUS_TIMEOUT_SEC: ClassVar = 0.1
-    MAX_TRANSACTION_ID: ClassVar = 2**16 - 1  # maximum number that fits in 2 bytes
-    MODBUS_MBAP_SIZE: ClassVar = 7
-    MBAP_HEADER_STRUCT_FORMAT: ClassVar = ">HHHB"
 
     def __init__(
         self,
@@ -104,7 +104,7 @@ class TCPModbusClient:
 
         # Instead of randomly sampling transaction IDs, we can use a global counter with random seed.
         # This way, we can avoid duplicate transaction IDs via birthday paradox.
-        self._next_transaction_id = random.randint(0, self.MAX_TRANSACTION_ID)
+        self._next_transaction_id = random.randint(0, MAX_TRANSACTION_ID)
 
     def __repr__(self) -> str:
         last_ping_msg = (
@@ -323,14 +323,12 @@ class TCPModbusClient:
         """
 
         request_transaction_id = self._next_transaction_id
-        self._next_transaction_id = (
-            self._next_transaction_id + 1
-        ) % self.MAX_TRANSACTION_ID
+        self._next_transaction_id = (self._next_transaction_id + 1) % MAX_TRANSACTION_ID
 
         msg_str = f"{request_function.__class__.__name__}[{request_transaction_id}]"
 
         request_mbap_header = struct.pack(
-            self.MBAP_HEADER_STRUCT_FORMAT,
+            MBAP_HEADER_STRUCT_FORMAT,
             request_transaction_id,
             0,
             len(request_function.request_pdu) + 1,
@@ -380,7 +378,7 @@ class TCPModbusClient:
                 )
 
             expected_response_size = (
-                request_function.expected_response_pdu_size + self.MODBUS_MBAP_SIZE
+                request_function.expected_response_pdu_size + MODBUS_MBAP_SIZE
             )
 
             try:
@@ -390,17 +388,15 @@ class TCPModbusClient:
                         reader.read(expected_response_size), timeout=timeout
                     )
 
-                    response_pdu = response_adu[self.MODBUS_MBAP_SIZE :]
-                    response_mbap_header = response_adu[: self.MODBUS_MBAP_SIZE]
+                    response_pdu = response_adu[MODBUS_MBAP_SIZE:]
+                    response_mbap_header = response_adu[:MODBUS_MBAP_SIZE]
 
                     (
                         response_transaction_id,
                         _,
                         mbap_asserted_pdu_length_plus_one,
                         response_asserted_slave_id,
-                    ) = struct.unpack(
-                        self.MBAP_HEADER_STRUCT_FORMAT, response_mbap_header
-                    )
+                    ) = struct.unpack(MBAP_HEADER_STRUCT_FORMAT, response_mbap_header)
 
                     seen_response_transaction_ids.append(response_transaction_id)
 
