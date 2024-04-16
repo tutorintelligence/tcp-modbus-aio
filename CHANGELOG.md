@@ -2,6 +2,13 @@
 
 
 
+## v0.1.1 (2024-04-16)
+
+### Fix
+
+* fix: extract constants from classvars to be globals ([`c3c39da`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/c3c39da0eedf1d84fbc8cad9d71147c01fd094c9))
+
+
 ## v0.1.0 (2024-04-16)
 
 ### Feature
