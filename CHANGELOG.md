@@ -2,6 +2,13 @@
 
 
 
+## v0.2.0 (2024-04-21)
+
+### Feature
+
+* feat: is_pingable check method and error on closed client ([`30aa42e`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/30aa42e47ef7d2e0b1f3cea0a77dc464d389e0f3))
+
+
 ## v0.1.1 (2024-04-16)
 
 ### Fix
