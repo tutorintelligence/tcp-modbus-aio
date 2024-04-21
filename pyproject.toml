@@ -31,3 +31,6 @@ style = "poetry_scripts:style"
 version_variables = ["tcp_modbus_aio/__init__.py:__version__"]
 version_toml = ["pyproject.toml:tool.poetry.version"]
 build_command = "pip install poetry && poetry build"
+
+[tool.isort]
+profile = "black"

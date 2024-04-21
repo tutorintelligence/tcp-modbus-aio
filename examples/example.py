@@ -2,7 +2,7 @@ import asyncio
 
 from umodbus.functions import ReadCoils
 
-from tcp_modbus_aio.connection import TCPModbusClient
+from tcp_modbus_aio.client import TCPModbusClient
 
 
 async def example() -> None:

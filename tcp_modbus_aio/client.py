@@ -81,6 +81,9 @@ class TCPModbusClient:
             name=f"TCPModbusClient._ping_loop_task[{self.host}:{self.port}]",
         )
 
+        # Event that is set when the first ping is received
+        self._first_ping_event: asyncio.Event = asyncio.Event()
+
         # List of CoilWatchStatus objects that are being logged
         self._log_watches = list[CoilWatchStatus]()
 
@@ -120,9 +123,11 @@ class TCPModbusClient:
     async def _ping_loop_task(self) -> None:
         while True:
             self._last_ping = await ping_ip(self.host)
+
             if self.logger is not None:
                 self.logger.debug(f"[{self}][_ping_loop_task] ping ping ping")
 
+            self._first_ping_event.set()
             await asyncio.sleep(self.PING_LOOP_PERIOD)
 
     async def _get_tcp_connection(
@@ -204,6 +209,13 @@ class TCPModbusClient:
         await self.close()
 
     async def close(self) -> None:
+        """
+        Permanent close of the TCP connection and ping loop.  Only call this on final destruction of the object.
+        """
+
+        if self._ping_loop is None:
+            return
+
         await self.clear_tcp_connection()
 
         if self._ping_loop is not None:
@@ -222,6 +234,9 @@ class TCPModbusClient:
         This debug loop expires after the given period, but is refreshed every time this request_function
         is called.
         """
+
+        if self._ping_loop is None:
+            raise RuntimeError("Cannot log watch on closed TCPModbusClient")
 
         for watch in self._log_watches:
             if watch.memo_key == memo_key:
@@ -278,6 +293,14 @@ class TCPModbusClient:
         )
 
     async def clear_tcp_connection(self) -> None:
+        """
+        Closes the current TCP connection and clears the reader and writer objects.
+        On the next send_modbus_message call, a new connection will be created.
+        """
+
+        if self._ping_loop is None:
+            raise RuntimeError("Cannot clear TCP connection on closed TCPModbusClient")
+
         if self._writer is not None:
             if self.logger is not None:
                 self.logger.warning(
@@ -294,8 +317,12 @@ class TCPModbusClient:
         self, timeout: float | None = DEFAULT_MODBUS_TIMEOUT_SEC
     ) -> None:
         """
+        Tests the connection to the device by sending a ReadCoil message (see TEST_CONNECTION_MESSAGE)
         Uses a cached awaitable to prevent spamming the connection on this call
         """
+
+        if self._ping_loop is None:
+            raise RuntimeError("Cannot test connection on closed TCPModbusClient")
 
         try:
             if self._active_connection_probe is None:
@@ -308,6 +335,20 @@ class TCPModbusClient:
         finally:
             self._active_connection_probe = None
 
+    async def is_pingable(self) -> bool:
+        """
+        Returns True if the device is pingable, False if not.
+        Will wait for the first ping to be received (or timeout) before returning.
+        """
+
+        if self._ping_loop is None:
+            raise RuntimeError("Cannot check pingability on closed TCPModbusClient")
+
+        if not self._first_ping_event.is_set():
+            await self._first_ping_event.wait()
+
+        return self._last_ping is not None
+
     async def send_modbus_message(
         self,
         request_function: ModbusFunctionT,
@@ -315,12 +356,13 @@ class TCPModbusClient:
         retries: int = 1,
         error_on_no_response: bool = True,
     ) -> ModbusFunctionT | None:
-        """Send ADU over socket to to server and return parsed response.
-
-        :param adu: Request ADU.
-        :param sock: Socket instance.
-        :return: Parsed response from server.
         """
+        Sends a modbus message to the device and returns the response.
+        Will create a new TCP connection if one does not exist.
+        """
+
+        if self._ping_loop is None:
+            raise RuntimeError("Cannot send modbus message on closed TCPModbusClient")
 
         request_transaction_id = self._next_transaction_id
         self._next_transaction_id = (self._next_transaction_id + 1) % MAX_TRANSACTION_ID
