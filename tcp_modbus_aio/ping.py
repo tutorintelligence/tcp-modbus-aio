@@ -5,7 +5,7 @@ import subprocess
 async def ping_ip(ip: str, timeout: float = 0.5) -> float | None:
     """Return the latency in seconds of a ping to the given ip, or None if the ping failed"""
     ping_process = await asyncio.create_subprocess_shell(
-        f"ping -c 1 {ip}", stdout=subprocess.PIPE
+        f"ping -c 1 {ip}", stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
     )
 
     try:
