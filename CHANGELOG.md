@@ -2,6 +2,13 @@
 
 
 
+## v0.2.1 (2024-04-25)
+
+### Fix
+
+* fix: ping stderr to devnull ([`c38a840`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/c38a840539db714ac27e293eacf153d573e4bf2f))
+
+
 ## v0.2.0 (2024-04-21)
 
 ### Feature
