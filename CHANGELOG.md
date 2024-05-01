@@ -2,6 +2,13 @@
 
 
 
+## v0.2.6 (2024-05-01)
+
+### Fix
+
+* fix: ConnectionResetError ([`c7d54c2`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/c7d54c2590f363527ac2d5e969be4c5bec68841f))
+
+
 ## v0.2.5 (2024-05-01)
 
 ### Fix
