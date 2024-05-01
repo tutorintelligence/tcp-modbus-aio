@@ -207,7 +207,7 @@ class TCPModbusClient:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: "TracebackType" | None,
+        exc_tb: "TracebackType | None",
     ) -> None:
         await self.close()
 
