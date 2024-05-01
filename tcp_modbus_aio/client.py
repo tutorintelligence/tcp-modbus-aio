@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class CoilWatchStatus:
-    msg: ModbusFunction
+    msg: "ModbusFunction"
 
     memo_key: Any
     expiry: float
@@ -228,7 +228,7 @@ class TCPModbusClient:
             self._ping_loop = None
 
     def log_watch(
-        self, msg: ModbusFunction, *, memo_key: Any, period: float, hz: float
+        self, msg: "ModbusFunction", *, memo_key: Any, period: float, hz: float
     ) -> None:
         """
         Triggers a loop that reads the coil(s) at the given index at the given frequency and
