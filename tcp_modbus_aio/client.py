@@ -200,14 +200,14 @@ class TCPModbusClient:
 
         return reader, writer
 
-    async def __aenter__(self) -> Self:
+    async def __aenter__(self) -> "Self":
         return self
 
     async def __aexit__(
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc_tb: "TracebackType" | None,
     ) -> None:
         await self.close()
 
