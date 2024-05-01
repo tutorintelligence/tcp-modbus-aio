@@ -6,12 +6,9 @@ import struct
 import time
 import uuid
 from dataclasses import dataclass
-from types import TracebackType
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from cachetools import TTLCache
-from typing_extensions import Self
-from umodbus.functions import ModbusFunction
 
 from tcp_modbus_aio.exceptions import (
     ModbusCommunicationFailureError,
@@ -23,6 +20,12 @@ from tcp_modbus_aio.typed_functions import (
     ReadCoils,
     create_function_from_response_pdu,
 )
+
+if TYPE_CHECKING:
+    from types import TracebackType
+
+    from typing_extensions import Self
+    from umodbus.functions import ModbusFunction
 
 
 @dataclass
@@ -308,7 +311,16 @@ class TCPModbusClient:
                 )
 
             self._writer.close()
-            await self._writer.wait_closed()
+
+            try:
+                await self._writer.wait_closed()
+            except TimeoutError:
+                if self.logger is not None:
+                    self.logger.warning(
+                        f"[{self}][clear_tcp_connection] connection close timed out, continuing anyway"
+                    )
+
+                pass
 
         self._reader = None
         self._writer = None

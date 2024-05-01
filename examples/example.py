@@ -14,7 +14,7 @@ async def example() -> None:
         response = await conn.send_modbus_message(example_message)
 
     assert response is not None, "we expect a response from ReadCoils"
-    print(response.data)
+    print(response.data)  # noqa: T201
 
 
 if __name__ == "__main__":
