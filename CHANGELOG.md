@@ -2,6 +2,13 @@
 
 
 
+## v0.2.5 (2024-05-01)
+
+### Fix
+
+* fix: fix TYPE_CHECKING 3 ([`de28e2a`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/de28e2a7c88bff9498a16ef77e2796f72a24b57a))
+
+
 ## v0.2.4 (2024-05-01)
 
 ### Fix
