@@ -314,7 +314,7 @@ class TCPModbusClient:
 
             try:
                 await self._writer.wait_closed()
-            except TimeoutError:
+            except (TimeoutError, ConnectionResetError):
                 if self.logger is not None:
                     self.logger.warning(
                         f"[{self}][clear_tcp_connection] connection close timed out, continuing anyway"
