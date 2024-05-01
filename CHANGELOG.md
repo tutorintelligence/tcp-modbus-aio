@@ -2,6 +2,13 @@
 
 
 
+## v0.2.3 (2024-05-01)
+
+### Fix
+
+* fix: handle TYPE_CHECKING correctly ([`f1dcac6`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/f1dcac6ab52b25441f651becf8e20006fe6ffd20))
+
+
 ## v0.2.2 (2024-05-01)
 
 ### Fix
