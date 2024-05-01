@@ -2,6 +2,13 @@
 
 
 
+## v0.2.2 (2024-05-01)
+
+### Fix
+
+* fix: handle timeout on connection close (#1) ([`6062ff8`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/6062ff84dd4c6ce69d91603f2869ec86560d49ee))
+
+
 ## v0.2.1 (2024-04-25)
 
 ### Fix
