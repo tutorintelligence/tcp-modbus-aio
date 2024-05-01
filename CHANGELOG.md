@@ -2,6 +2,13 @@
 
 
 
+## v0.2.4 (2024-05-01)
+
+### Fix
+
+* fix: more type checking client.py ([`211ee97`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/211ee979fa235215818ed68418e8879a7398551a))
+
+
 ## v0.2.3 (2024-05-01)
 
 ### Fix
