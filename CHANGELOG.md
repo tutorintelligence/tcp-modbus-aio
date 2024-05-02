@@ -2,6 +2,13 @@
 
 
 
+## v0.2.7 (2024-05-02)
+
+### Fix
+
+* fix: self-correct transaction id mismatch errors ([`3335a79`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/3335a79933579e600b0ae56ecd94ac5998295ead))
+
+
 ## v0.2.6 (2024-05-01)
 
 ### Fix
