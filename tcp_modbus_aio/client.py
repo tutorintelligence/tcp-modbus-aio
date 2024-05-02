@@ -534,6 +534,9 @@ class TCPModbusClient:
                     f"[{self}][send_modbus_message] {msg} {response_adu=}"
                 )
 
+            # THIS IS IMPORTANT SO MISMATCH ERRORS SELF CORRECT
+            self._lost_transaction_ids[request_transaction_id] = True
+
             raise ModbusCommunicationFailureError(msg)
 
         return response_function
