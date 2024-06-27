@@ -2,6 +2,13 @@
 
 
 
+## v0.2.8 (2024-06-27)
+
+### Fix
+
+* fix: catch OSError on clearing tcp connection ([`0e55b6e`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/0e55b6eea275f77c31fc784a785dca48241d6a03))
+
+
 ## v0.2.7 (2024-05-02)
 
 ### Fix
