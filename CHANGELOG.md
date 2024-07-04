@@ -2,6 +2,13 @@
 
 
 
+## v0.2.9 (2024-07-04)
+
+### Fix
+
+* fix: more correct accounting for timeouts ([`12c9f62`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/12c9f62efc9c07daf4fe21a5515e0c69cb7e6cc7))
+
+
 ## v0.2.8 (2024-06-27)
 
 ### Fix
