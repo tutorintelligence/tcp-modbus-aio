@@ -514,7 +514,8 @@ class TCPModbusClient:
 
                     return None
         finally:
-            self._comms_lock.release()
+            if self._comms_lock.locked():
+                self._comms_lock.release()
 
         response_function = create_function_from_response_pdu(
             response_pdu, request_function
