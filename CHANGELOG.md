@@ -2,6 +2,13 @@
 
 
 
+## v0.2.13 (2024-07-05)
+
+### Fix
+
+* fix: better stream reconstruction logic to handle backpressure and connectionreseterrors ([`1830b13`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/1830b13ca5ebe5dfdfde4a7d840730ea8ae6c166))
+
+
 ## v0.2.12 (2024-07-05)
 
 ### Fix
