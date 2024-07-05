@@ -2,6 +2,13 @@
 
 
 
+## v0.2.12 (2024-07-05)
+
+### Fix
+
+* fix: better handle ConnectionResetError and log timing ([`1c8fab8`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/1c8fab8087aac3c10252a261c47199e7d6cc4e5f))
+
+
 ## v0.2.11 (2024-07-05)
 
 ### Fix
