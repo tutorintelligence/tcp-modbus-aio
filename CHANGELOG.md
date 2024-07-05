@@ -2,6 +2,13 @@
 
 
 
+## v0.2.10 (2024-07-05)
+
+### Fix
+
+* fix: refactor connection to better handle dropped data in stream ([`db08254`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/db0825429192317678aa72b02f41262bb87e0600))
+
+
 ## v0.2.9 (2024-07-04)
 
 ### Fix

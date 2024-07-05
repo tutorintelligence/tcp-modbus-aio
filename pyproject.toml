@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tcp-modbus-aio"
-version = "0.2.9"
+version = "0.2.10"
 description = "asyncio client library for tcp modbus devices"
 authors = ["Josh Gruenstein <josh@tutorintelligence.com>"]
 license = "MIT"
