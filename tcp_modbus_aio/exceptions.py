@@ -7,6 +7,12 @@ class ModbusCommunicationFailureError(ModbusError):
     pass
 
 
+class ModbusCommunicationTimeoutError(ModbusCommunicationFailureError):
+    """Timeout in communicating with modbus device."""
+
+    pass
+
+
 class ModbusNotConnectedError(ModbusCommunicationFailureError):
     """Modbus not connected error."""
 
