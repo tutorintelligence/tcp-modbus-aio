@@ -2,6 +2,13 @@
 
 
 
+## v0.2.11 (2024-07-05)
+
+### Fix
+
+* fix: do not release connection lock unless you have it ([`53a64b3`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/53a64b38a4accd917424181dc5a584b83f88100d))
+
+
 ## v0.2.10 (2024-07-05)
 
 ### Fix
