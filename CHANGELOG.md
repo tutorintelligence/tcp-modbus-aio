@@ -2,6 +2,13 @@
 
 
 
+## v0.3.0 (2024-07-10)
+
+### Feature
+
+* feat: support socks proxy ([`12d7d4a`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/12d7d4a09041d059cc8124f2ae9ea3dae67aa46f))
+
+
 ## v0.2.13 (2024-07-05)
 
 ### Fix
