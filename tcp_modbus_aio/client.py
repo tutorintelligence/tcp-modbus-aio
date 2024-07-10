@@ -8,6 +8,7 @@ import uuid
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, ClassVar
 
+import aiosocks
 from cachetools import TTLCache
 
 from tcp_modbus_aio.exceptions import (
@@ -50,7 +51,6 @@ MODBUS_MBAP_SIZE = 7
 MBAP_HEADER_STRUCT_FORMAT = ">HHHB"
 
 
-@dataclass
 class TCPModbusClient:
     KEEPALIVE_AFTER_IDLE_SEC: ClassVar = 10
     KEEPALIVE_INTERVAL_SEC: ClassVar = 10
@@ -68,12 +68,16 @@ class TCPModbusClient:
         logger: logging.Logger | None = None,
         enforce_pingable: bool = True,
         ping_timeout: float = 0.5,
+        socks_proxy_addr: aiosocks.SocksAddr | None = None,
+        socks_proxy_auth: aiosocks.Socks4Auth | aiosocks.Socks5Auth | None = None,
     ) -> None:
         self.host = host
         self.port = port
         self.slave_id = slave_id
         self.logger = logger
         self.ping_timeout = ping_timeout
+        self.socks_proxy_addr = socks_proxy_addr
+        self.socks_proxy_auth = socks_proxy_auth
 
         # If True, will throw an exception if attempting to send a request and the device is not pingable
         self.enforce_pingable = enforce_pingable
@@ -160,9 +164,19 @@ class TCPModbusClient:
             )
 
         try:
-            reader, writer = await asyncio.wait_for(
-                asyncio.open_connection(host=self.host, port=self.port), timeout
-            )
+            if self.socks_proxy_addr is None:
+                open_connection_coroutine = asyncio.open_connection(
+                    host=self.host, port=self.port
+                )
+            else:
+                open_connection_coroutine = aiosocks.open_connection(
+                    proxy=self.socks_proxy_addr,
+                    proxy_auth=self.socks_proxy_auth,
+                    dst=(self.host, self.port),
+                    remote_resolve=True,
+                )
+
+            reader, writer = await asyncio.wait_for(open_connection_coroutine, timeout)
         except asyncio.TimeoutError:
             msg = (
                 f"Timed out connecting to TCP modbus device at {self.host}:{self.port}"
