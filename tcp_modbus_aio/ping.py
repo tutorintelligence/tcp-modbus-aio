@@ -32,6 +32,6 @@ async def ping_ip(ip: str, timeout: float = 0.5) -> float | None:
         ping_output_str = ping_output_str.split(" ")[6]
         ping_output_str = ping_output_str.split("=")[1]
         ping_output_latency = float(ping_output_str)
-        return ping_output_latency
+        return ping_output_latency / 1000
     except Exception:
         return None

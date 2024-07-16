@@ -58,6 +58,7 @@ class TCPModbusClient:
 
     PING_LOOP_PERIOD: ClassVar = 1
     CONSECUTIVE_TIMEOUTS_TO_RECONNECT: ClassVar = 5
+    COOLDOWN_BEFORE_RECONNECTING_SEC: ClassVar = 0.01
 
     def __init__(
         self,
@@ -129,6 +130,9 @@ class TCPModbusClient:
         # This way, we can avoid duplicate transaction IDs via birthday paradox.
         self._next_transaction_id = random.randint(0, MAX_TRANSACTION_ID)
 
+        # Keep track of the last time we closed a connection, to implement a cooldown before reconnecting.
+        self._last_close_time = time.time()
+
     def __repr__(self) -> str:
         last_ping_msg = (
             f"{self._last_ping*1000:.1f}ms ping"
@@ -155,6 +159,11 @@ class TCPModbusClient:
     ) -> tuple[asyncio.StreamReader, asyncio.StreamWriter]:
         if self._reader is not None and self._writer is not None:
             return self._reader, self._writer
+
+        cooldown_elapsed = time.time() - self._last_close_time
+        cooldown_remaining = self.COOLDOWN_BEFORE_RECONNECTING_SEC - cooldown_elapsed
+        if cooldown_remaining > 0:
+            await asyncio.sleep(cooldown_remaining)
 
         self._lifetime_tcp_connection_num += 1
 
@@ -351,6 +360,8 @@ class TCPModbusClient:
         self._reader = None
         self._writer = None
 
+        self._last_close_time = time.time()
+
     async def test_connection(
         self, timeout: float | None = DEFAULT_MODBUS_TIMEOUT_SEC
     ) -> None:
@@ -521,7 +532,7 @@ class TCPModbusClient:
                             "before mbap header, likely catching up stream after timeouts"
                         )
 
-                # STEP FOUR: READ THE RESPONSE PDU
+                # STEP FIVE: READ THE RESPONSE PDU
                 with catchtime() as read_pdu_time:
                     response_pdu = await asyncio.wait_for(
                         reader.readexactly(request_function.expected_response_pdu_size),
@@ -551,7 +562,7 @@ class TCPModbusClient:
         except OSError as e:
             if self.logger is not None:
                 self.logger.warning(
-                    f"[{self}][send_modbus_message] OSError{type(e).__name__}({e}) while sending request {msg_str}, "
+                    f"[{self}][send_modbus_message] OSError({type(e).__name__})({e}) while sending request {msg_str}, "
                     "clearing connection"
                 )
 
