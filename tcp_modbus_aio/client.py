@@ -131,7 +131,7 @@ class TCPModbusClient:
         self._next_transaction_id = random.randint(0, MAX_TRANSACTION_ID)
 
         # Keep track of the last time we closed a connection, to implement a cooldown before reconnecting.
-        self._last_close_time = time.time()
+        self._last_close_time = time.perf_counter()
 
     def __repr__(self) -> str:
         last_ping_msg = (
@@ -160,7 +160,7 @@ class TCPModbusClient:
         if self._reader is not None and self._writer is not None:
             return self._reader, self._writer
 
-        cooldown_elapsed = time.time() - self._last_close_time
+        cooldown_elapsed = time.perf_counter() - self._last_close_time
         cooldown_remaining = self.COOLDOWN_BEFORE_RECONNECTING_SEC - cooldown_elapsed
         if cooldown_remaining > 0:
             await asyncio.sleep(cooldown_remaining)
@@ -360,7 +360,7 @@ class TCPModbusClient:
         self._reader = None
         self._writer = None
 
-        self._last_close_time = time.time()
+        self._last_close_time = time.perf_counter()
 
     async def test_connection(
         self, timeout: float | None = DEFAULT_MODBUS_TIMEOUT_SEC
