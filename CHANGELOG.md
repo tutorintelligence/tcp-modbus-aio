@@ -2,6 +2,13 @@
 
 
 
+## v0.4.0 (2024-07-16)
+
+### Feature
+
+* feat: Add reconnect cooldown (#2) ([`706938d`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/706938d7918a1a11f02250efa80ae2130fb4e3f5))
+
+
 ## v0.3.0 (2024-07-10)
 
 ### Feature
