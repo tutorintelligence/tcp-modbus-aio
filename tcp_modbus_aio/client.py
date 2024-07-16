@@ -528,10 +528,10 @@ class TCPModbusClient:
             raise ModbusCommunicationTimeoutError(
                 f"Request {msg_str} timed out to {self.host}:{self.port}"
             ) from e
-        except OSError as e:
+        except (OSError, EOFError) as e:
             if self.logger is not None:
                 self.logger.warning(
-                    f"[{self}][send_modbus_message] OSError({type(e).__name__})({e}) while sending request {msg_str}, "
+                    f"[{self}][send_modbus_message] {type(e).__name__}({e}) while sending request {msg_str}, "
                     "clearing connection"
                 )
 
@@ -540,7 +540,7 @@ class TCPModbusClient:
             if retries > 0:
                 if self.logger is not None:
                     self.logger.warning(
-                        f"[{self}][send_modbus_message] Retrying {retries} more time(s) after failure to write"
+                        f"[{self}][send_modbus_message] Retrying {retries} more time(s) after failure"
                     )
 
                 # release the lock before retrying (so we can re-get it)
