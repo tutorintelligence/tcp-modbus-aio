@@ -2,6 +2,13 @@
 
 
 
+## v0.4.1 (2024-07-17)
+
+### Fix
+
+* fix: Retry in more circumstances (#3) ([`5256c58`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/5256c58b19732c0b85f50ef12c07d52d6f8dc86a))
+
+
 ## v0.4.0 (2024-07-16)
 
 ### Feature
