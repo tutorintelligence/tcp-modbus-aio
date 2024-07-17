@@ -467,45 +467,14 @@ class TCPModbusClient:
             time_budget_remaining -= conn_t()
 
             # STEP THREE: WRITE OUR REQUEST
-            try:
-                writer.write(request_adu)
+            writer.write(request_adu)
 
-                with catchtime() as write_t:
-                    await asyncio.wait_for(writer.drain(), time_budget_remaining)
-                time_budget_remaining -= write_t()
+            with catchtime() as write_t:
+                await asyncio.wait_for(writer.drain(), time_budget_remaining)
+            time_budget_remaining -= write_t()
 
-                if self.logger is not None:
-                    self.logger.debug(f"[{self}][send_modbus_message] wrote {msg_str}")
-
-            except OSError:  # this includes timeout errors
-                # Clear connection no matter what if we fail on the write
-                # TODO: consider revisiting this to not do it on a timeouterror
-                # (but Gru is scared about partial writes)
-
-                if self.logger is not None:
-                    self.logger.warning(
-                        f"[{self}][send_modbus_message] Failed to send data to modbus device for "
-                        f"request {msg_str}, clearing connection"
-                    )
-
-                self.clear_tcp_connection()
-
-                if retries > 0:
-                    if self.logger is not None:
-                        self.logger.warning(
-                            f"[{self}][send_modbus_message] Retrying {retries} more time(s) after failure to write"
-                        )
-
-                    # release the lock before retrying (so we can re-get it)
-                    self._comms_lock.release()
-
-                    return await self.send_modbus_message(
-                        request_function,
-                        timeout=timeout,
-                        retries=retries - 1,
-                    )
-
-                raise
+            if self.logger is not None:
+                self.logger.debug(f"[{self}][send_modbus_message] wrote {msg_str}")
 
             try:
                 # STEP FOUR: READ THE MBAP HEADER FROM THE RESPONSE (AND ANY JUNK)
@@ -559,14 +528,29 @@ class TCPModbusClient:
             raise ModbusCommunicationTimeoutError(
                 f"Request {msg_str} timed out to {self.host}:{self.port}"
             ) from e
-        except OSError as e:
+        except (OSError, EOFError) as e:
             if self.logger is not None:
                 self.logger.warning(
-                    f"[{self}][send_modbus_message] OSError({type(e).__name__})({e}) while sending request {msg_str}, "
+                    f"[{self}][send_modbus_message] {type(e).__name__}({e}) while sending request {msg_str}, "
                     "clearing connection"
                 )
 
             self.clear_tcp_connection()
+
+            if retries > 0:
+                if self.logger is not None:
+                    self.logger.warning(
+                        f"[{self}][send_modbus_message] Retrying {retries} more time(s) after failure"
+                    )
+
+                # release the lock before retrying (so we can re-get it)
+                self._comms_lock.release()
+
+                return await self.send_modbus_message(
+                    request_function,
+                    timeout=timeout,
+                    retries=retries - 1,
+                )
 
             raise ModbusCommunicationFailureError(
                 f"Request {msg_str} failed to {self.host}:{self.port} ({type(e).__name__}({e}))"
