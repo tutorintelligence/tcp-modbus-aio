@@ -2,6 +2,13 @@
 
 
 
+## v0.4.2 (2024-10-10)
+
+### Fix
+
+* fix: Retry on timeout (#4) ([`0ce5417`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/0ce5417e3fe1dfaeff35a490ee16dd060417e61e))
+
+
 ## v0.4.1 (2024-07-17)
 
 ### Fix
