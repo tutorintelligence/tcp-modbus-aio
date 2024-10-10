@@ -13,7 +13,7 @@ from cachetools import TTLCache
 
 from tcp_modbus_aio.exceptions import (
     ModbusCommunicationFailureError,
-    ModbusCommunicationTimeoutError,
+    ModbusConcurrencyError,
     ModbusNotConnectedError,
 )
 from tcp_modbus_aio.ping import ping_ip
@@ -57,7 +57,6 @@ class TCPModbusClient:
     KEEPALIVE_MAX_FAILS: ClassVar = 5
 
     PING_LOOP_PERIOD: ClassVar = 1
-    CONSECUTIVE_TIMEOUTS_TO_RECONNECT: ClassVar = 5
     COOLDOWN_BEFORE_RECONNECTING_SEC: ClassVar = 0.01
 
     def __init__(
@@ -89,9 +88,6 @@ class TCPModbusClient:
         # TCP reader and writer objects for active connection, or None if no connection
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
-
-        # Number of current consecutive modbus calls that resulted in a timeout
-        self._consecutive_timeouts = 0
 
         # Last ping time in seconds from ping loop, or None if the last ping failed
         self._last_ping: float | None = None
@@ -192,7 +188,7 @@ class TCPModbusClient:
             )
             if self.logger is not None:
                 self.logger.warning(f"[{self}][_get_tcp_connection] {msg}")
-            raise ModbusCommunicationTimeoutError(msg)
+            raise ModbusCommunicationFailureError(msg)
         except OSError:
             msg = f"Cannot connect to TCP modbus device at {self.host}:{self.port}"
             if self.logger is not None:
@@ -447,7 +443,7 @@ class TCPModbusClient:
                     self._comms_lock.acquire(), time_budget_remaining
                 )
             except asyncio.TimeoutError:
-                raise ModbusCommunicationTimeoutError(
+                raise ModbusConcurrencyError(
                     f"Failed to acquire lock to send request {msg_str} to modbus device {self.host}"
                 )
         time_budget_remaining -= lock_t()
@@ -515,20 +511,7 @@ class TCPModbusClient:
                     return None
 
                 raise
-        except asyncio.TimeoutError as e:
-            self._consecutive_timeouts += 1
-            if self._consecutive_timeouts >= self.CONSECUTIVE_TIMEOUTS_TO_RECONNECT:
-                if self.logger is not None:
-                    self.logger.warning(
-                        f"[{self}][send_modbus_message] {self._consecutive_timeouts} consecutive timeouts, "
-                        "clearing connection"
-                    )
-                self.clear_tcp_connection()
-
-            raise ModbusCommunicationTimeoutError(
-                f"Request {msg_str} timed out to {self.host}:{self.port}"
-            ) from e
-        except (OSError, EOFError) as e:
+        except (OSError, EOFError, asyncio.TimeoutError) as e:
             if self.logger is not None:
                 self.logger.warning(
                     f"[{self}][send_modbus_message] {type(e).__name__}({e}) while sending request {msg_str}, "

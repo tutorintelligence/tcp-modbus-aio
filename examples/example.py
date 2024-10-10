@@ -3,10 +3,7 @@ import asyncio
 from aiosocks import Socks5Addr
 
 from tcp_modbus_aio.client import TCPModbusClient
-from tcp_modbus_aio.exceptions import (
-    ModbusCommunicationFailureError,
-    ModbusCommunicationTimeoutError,
-)
+from tcp_modbus_aio.exceptions import ModbusCommunicationFailureError
 from tcp_modbus_aio.typed_functions import ReadCoils
 
 DIGITAL_IN_COILS = list(range(8))
@@ -32,8 +29,6 @@ async def example() -> None:
                     )
                     assert response is not None, "we expect a response from ReadCoils"
                     print(response.data)  # noqa: T201
-                except ModbusCommunicationTimeoutError as e:
-                    print(f"{type(e).__name__}({e})")
                 except ModbusCommunicationFailureError as e:
                     print(f"{type(e).__name__}({e})")
 
