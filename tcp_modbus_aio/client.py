@@ -446,7 +446,7 @@ class TCPModbusClient:
                 raise ModbusConcurrencyError(
                     f"Failed to acquire lock to send request {msg_str} to modbus device {self.host}"
                 )
-            
+
         i_have_lock = True
         time_budget_remaining -= lock_t()
 
