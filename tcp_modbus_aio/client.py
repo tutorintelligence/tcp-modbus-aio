@@ -446,6 +446,8 @@ class TCPModbusClient:
                 raise ModbusConcurrencyError(
                     f"Failed to acquire lock to send request {msg_str} to modbus device {self.host}"
                 )
+
+        i_have_lock = True
         time_budget_remaining -= lock_t()
 
         try:
@@ -528,6 +530,7 @@ class TCPModbusClient:
 
                 # release the lock before retrying (so we can re-get it)
                 self._comms_lock.release()
+                i_have_lock = False  # Don't release someone elses lock in the finally
 
                 return await self.send_modbus_message(
                     request_function,
@@ -539,7 +542,7 @@ class TCPModbusClient:
                 f"Request {msg_str} failed to {self.host}:{self.port} ({type(e).__name__}({e}))"
             ) from e
         finally:
-            if self._comms_lock.locked():
+            if self._comms_lock.locked() and i_have_lock:
                 self._comms_lock.release()
 
         self._consecutive_timeouts = 0
