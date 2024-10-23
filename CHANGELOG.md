@@ -2,6 +2,15 @@
 
 
 
+## v0.4.3 (2024-10-23)
+
+### Fix
+
+* fix: prevent multiple tasks from using the same connection (#5)
+
+Co-authored-by: Alon Kosowsky-Sachs &lt;alon@tutorintelligence.com&gt; ([`c40c161`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/c40c161fe61dc13c47c1546c3df4213032c0d25c))
+
+
 ## v0.4.2 (2024-10-10)
 
 ### Fix
