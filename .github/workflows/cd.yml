@@ -11,14 +11,14 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
           
       - name: Python Semantic Release
         id: release
-        uses: python-semantic-release/python-semantic-release@v9.0.0
+        uses: python-semantic-release/python-semantic-release@v9
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           root_options: "-vv"
