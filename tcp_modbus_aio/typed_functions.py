@@ -30,6 +30,8 @@ ModbusFunctionT = TypeVar("ModbusFunctionT", bound=ModbusFunction)
 class ReadCoils(ReadCoilsUntyped):  # type: ignore
     @property
     def return_value(self) -> tuple[bool, ...]:
+        if self.data is None:
+            return tuple()
         return tuple(bool(v) for v in self.data[: self.quantity])
 
     def __repr__(self) -> str:
@@ -43,6 +45,8 @@ class ReadInputRegisters(ReadInputRegistersUntyped):  # type: ignore
 
     @property
     def return_value(self) -> Any:
+        if self.data is None:
+            return None
         return struct.unpack(
             self.struct_dtype, struct.pack("<" + "H" * len(self.data), *self.data)
         )[0]
