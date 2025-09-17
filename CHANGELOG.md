@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.4.5 (2025-09-17)
+
+### Bug Fixes
+
+- Tolerate one failed ping ([#6](https://github.com/tutorintelligence/tcp-modbus-aio/pull/6),
+  [`2219d83`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/2219d832210a04381fcf90b466c6955889bbc0ab))
+
+
 ## v0.4.4 (2025-08-18)
 
 ### Bug Fixes
