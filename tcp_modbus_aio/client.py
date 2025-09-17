@@ -56,7 +56,7 @@ class TCPModbusClient:
     KEEPALIVE_INTERVAL_SEC: ClassVar = 10
     KEEPALIVE_MAX_FAILS: ClassVar = 5
 
-    PING_LOOP_PERIOD: ClassVar = 1
+    PING_LOOP_PERIOD: ClassVar = 0.5
     COOLDOWN_BEFORE_RECONNECTING_SEC: ClassVar = 0.01
 
     def __init__(
@@ -89,8 +89,10 @@ class TCPModbusClient:
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
 
-        # Last ping time in seconds from ping loop, or None if the last ping failed
-        self._last_ping: float | None = None
+        # Latency in seconds of last successful ping, or None if there has been no successful ping
+        self._last_ping_latency: float | None = None
+        # Timestamp of last successful ping, or None if there has been no successful ping
+        self._last_ping_timestamp: float | None = None
 
         # Task that pings the device every second
         self._ping_loop: asyncio.Task | None = asyncio.create_task(
@@ -131,8 +133,8 @@ class TCPModbusClient:
 
     def __repr__(self) -> str:
         last_ping_msg = (
-            f"{self._last_ping*1000:.1f}ms ping"
-            if self._last_ping is not None
+            f"{self._last_ping_latency*1000:.1f}ms ping ({(time.perf_counter() - self._last_ping_timestamp)*1000:03d}ms ago)"
+            if self._last_ping_latency is not None and self._last_ping_timestamp is not None
             else "no ping"
         )
         return (
@@ -142,7 +144,10 @@ class TCPModbusClient:
 
     async def _ping_loop_task(self) -> None:
         while True:
-            self._last_ping = await ping_ip(self.host, timeout=self.ping_timeout)
+            ping_result = await ping_ip(self.host, timeout=self.ping_timeout)
+            if ping_result is not None:
+                self._last_ping_latency = ping_result
+                self._last_ping_timestamp = time.perf_counter()
 
             if self.logger is not None:
                 self.logger.debug(f"[{self}][_ping_loop_task] ping ping ping")
@@ -392,7 +397,7 @@ class TCPModbusClient:
         if not self._first_ping_event.is_set():
             await self._first_ping_event.wait()
 
-        return self._last_ping is not None
+        return time.perf_counter() - self._last_ping_timestamp < 2 * self.PING_LOOP_PERIOD
 
     async def send_modbus_message(
         self,
@@ -536,6 +541,7 @@ class TCPModbusClient:
                     request_function,
                     timeout=timeout,
                     retries=retries - 1,
+                    error_on_no_response=error_on_no_response,
                 )
 
             raise ModbusCommunicationFailureError(
