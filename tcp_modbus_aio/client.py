@@ -397,7 +397,8 @@ class TCPModbusClient:
         if not self._first_ping_event.is_set():
             await self._first_ping_event.wait()
 
-        return time.perf_counter() - self._last_ping_timestamp < 2 * self.PING_LOOP_PERIOD
+        # each failed ping takes 1 second. Tolerate 1 failed ping.
+        return time.perf_counter() - self._last_ping_timestamp < 2
 
     async def send_modbus_message(
         self,
