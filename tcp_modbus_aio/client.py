@@ -133,8 +133,10 @@ class TCPModbusClient:
 
     def __repr__(self) -> str:
         last_ping_msg = (
-            f"{self._last_ping_latency*1000:.1f}ms ping ({(time.perf_counter() - self._last_ping_timestamp)*1000:03d}ms ago)"
-            if self._last_ping_latency is not None and self._last_ping_timestamp is not None
+            f"{self._last_ping_latency*1000:.1f}ms ping "
+            f"({(time.perf_counter() - self._last_ping_timestamp)*1000:03d}ms ago)"
+            if self._last_ping_latency is not None
+            and self._last_ping_timestamp is not None
             else "no ping"
         )
         return (
@@ -398,7 +400,10 @@ class TCPModbusClient:
             await self._first_ping_event.wait()
 
         # each failed ping takes 1 second. Tolerate 1 failed ping.
-        return time.perf_counter() - self._last_ping_timestamp < 2
+        return (
+            self._last_ping_timestamp is not None
+            and time.perf_counter() - self._last_ping_timestamp < 2
+        )
 
     async def send_modbus_message(
         self,
