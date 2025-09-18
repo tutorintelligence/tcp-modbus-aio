@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v0.4.6 (2025-09-18)
+
+### Bug Fixes
+
+- Style regression from v0.4.5 ([#7](https://github.com/tutorintelligence/tcp-modbus-aio/pull/7),
+  [`1870276`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/187027651833d3c6986875d6dcb835e483a4e8c9))
+
+
 ## v0.4.5 (2025-09-17)
 
 ### Bug Fixes
