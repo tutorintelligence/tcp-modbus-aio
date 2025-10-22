@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.4.7 (2025-10-22)
+
+### Bug Fixes
+
+- Create v0.4.7, equal to v0.4.4
+  ([`f8c7681`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/f8c7681b8f08d9379af7de307b42f79f3732c716))
+
+### Chores
+
+- Revert code to v0.4.4
+  ([`3359bf9`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/3359bf965915860e0855f1e3dab17a2180adec33))
+
+
 ## v0.4.6 (2025-09-18)
 
 ### Bug Fixes
