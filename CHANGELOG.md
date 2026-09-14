@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v0.4.8 (2026-09-14)
+
+### Bug Fixes
+
+- Rename the style console script to tcp-modbus-aio-style
+  ([#8](https://github.com/tutorintelligence/tcp-modbus-aio/pull/8),
+  [`8ad57ff`](https://github.com/tutorintelligence/tcp-modbus-aio/commit/8ad57ff5ac88da998ea42918b4f6fea2d0f089ae))
+
+Co-authored-by: Jackson Meade <jackson@tutorintelligence.com>
+
+Co-authored-by: Claude Opus 5 (1M context) <noreply@anthropic.com>
+
+
 ## v0.4.7 (2025-10-22)
 
 ### Bug Fixes
