@@ -536,6 +536,7 @@ class TCPModbusClient:
                     request_function,
                     timeout=timeout,
                     retries=retries - 1,
+                    error_on_no_response=error_on_no_response,
                 )
 
             raise ModbusCommunicationFailureError(
