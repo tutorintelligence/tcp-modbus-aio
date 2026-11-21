@@ -49,6 +49,7 @@ DEFAULT_MODBUS_TIMEOUT_SEC = 0.1
 MAX_TRANSACTION_ID = 2**16 - 1  # maximum number that fits in 2 bytes
 MODBUS_MBAP_SIZE = 7
 MBAP_HEADER_STRUCT_FORMAT = ">HHHB"
+MODBUS_EXCEPTION_PDU_SIZE = 2
 
 
 class TCPModbusClient:
@@ -394,6 +395,22 @@ class TCPModbusClient:
 
         return self._last_ping is not None
 
+    async def _read_response_mbap_header(
+        self, reader: asyncio.StreamReader, transaction_id: int, pdu_sizes: tuple[int, ...]
+    ) -> tuple[bytes, int]:
+        """
+        Reads up to and including the MBAP header of the response to transaction_id, skipping junk.
+        Returns the bytes read and the PDU size given by the header's length field.
+        """
+        prefix = struct.pack(">HH", transaction_id, 0)
+        skipped = b""
+        while True:
+            data = await reader.readuntil(prefix) + await reader.readexactly(3)
+            length, unit_id = struct.unpack(">HB", data[-3:])
+            if unit_id == self.slave_id and length - 1 in pdu_sizes:
+                return skipped + data, length - 1
+            skipped += data
+
     async def send_modbus_message(
         self,
         request_function: ModbusFunctionT,
@@ -476,17 +493,15 @@ class TCPModbusClient:
 
             try:
                 # STEP FOUR: READ THE MBAP HEADER FROM THE RESPONSE (AND ANY JUNK)
-                expected_response_mbap_header = struct.pack(
-                    MBAP_HEADER_STRUCT_FORMAT,
-                    request_transaction_id,
-                    0,
-                    request_function.expected_response_pdu_size + 1,
-                    self.slave_id,
-                )
-
+                # A modbus exception reply has a 2 byte PDU (function code + 0x80, exception code),
+                # so accept that length as well as the normal response length.
                 with catchtime() as read_mbap_t:
-                    response_up_to_mbap_header = await asyncio.wait_for(
-                        reader.readuntil(expected_response_mbap_header),
+                    response_up_to_mbap_header, response_pdu_size = await asyncio.wait_for(
+                        self._read_response_mbap_header(
+                            reader,
+                            request_transaction_id,
+                            (request_function.expected_response_pdu_size, MODBUS_EXCEPTION_PDU_SIZE),
+                        ),
                         timeout=time_budget_remaining,
                     )
                 time_budget_remaining -= read_mbap_t()
@@ -502,7 +517,7 @@ class TCPModbusClient:
                 # STEP FIVE: READ THE RESPONSE PDU
                 with catchtime() as read_pdu_time:
                     response_pdu = await asyncio.wait_for(
-                        reader.readexactly(request_function.expected_response_pdu_size),
+                        reader.readexactly(response_pdu_size),
                         timeout=time_budget_remaining,
                     )
                 time_budget_remaining -= read_pdu_time()
